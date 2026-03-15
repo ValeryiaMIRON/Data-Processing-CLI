@@ -3,14 +3,22 @@ import { up, cd, ls } from './navigation.js';
 import { count } from './commands/count.js';
 import { csvToJson } from './commands/csvToJson.js';
 import { jsonToCsv } from './commands/jsonToCsv.js';
+import { hash } from './commands/hash.js';
 
 function parseArgs(args) {
     const parsed = {};
-    for (let i = 0; i < args.length; i += 2) {
-        if (args[i] && args[i].startsWith('--') && args[i + 1]) {
-            parsed[args[i]] = args[i + 1];
+
+    for (let i = 0; i < args.length; i++) {
+        if (args[i].startsWith('--')) {
+            if (args[i + 1] && !args[i + 1].startsWith('--')) {
+                parsed[args[i]] = args[i + 1];
+                i++;
+            } else {
+                parsed[args[i]] = true;
+            }
         }
     }
+
     return parsed;
 }
 
@@ -51,15 +59,6 @@ export function startRepl(state) {
                 case 'ls':
                     await ls(state);
                     break;
-
-                // case 'count':
-                //     if (!args.includes('--input')) {
-                //         console.log('Invalid input');
-                //         rl.prompt();
-                //         return;
-                //     }
-                //     await count(state.cwd, args);
-                //     break;
                 case 'count':
                     const inputIndex = args.indexOf('--input');
                     if (inputIndex === -1 || !args[inputIndex + 1]) {
@@ -69,7 +68,7 @@ export function startRepl(state) {
                     }
 
                     const inputFile = args[inputIndex + 1];
-                    await count(state.cwd, { input: inputFile }); // <-- передаём объект с input
+                    await count(state.cwd, { input: inputFile });
                     break;
 
                 case 'csv-to-json':
@@ -90,6 +89,16 @@ export function startRepl(state) {
                         return;
                     }
                     await jsonToCsv(state.cwd, jsonArgs);
+                    break;
+                case 'hash':
+                    const hashArgs = parseArgs(args);
+                    if (!hashArgs['--input']) {
+                        console.log('Invalid input');
+                        rl.prompt();
+                        return;
+                    }
+
+                    await hash(state.cwd, hashArgs);
                     break;
 
                 default:

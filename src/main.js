@@ -1,10 +1,10 @@
-import path from 'path';
+import os from 'os';
 import { startRepl } from './repl.js';
 
 console.log('Welcome to Data Processing CLI!');
 
 const state = {
-  cwd: path.resolve('./') // текущая директория, откуда запустила npm run start
+  cwd: os.homedir()
 };
 
 console.log(`You are currently in ${state.cwd}`);
