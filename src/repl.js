@@ -26,10 +26,14 @@ export function startRepl(state) {
         up(state);
         break;
 
-      case 'cd':
-        if (!arg) throw new Error();
-        await cd(state, arg);
-        break;
+     case 'cd':
+     if (!arg) {
+    console.log('Invalid input');
+    rl.prompt();
+    return;
+  }
+  await cd(state, arg);
+  break;
 
       case 'ls':
         await ls(state);
