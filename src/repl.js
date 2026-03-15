@@ -9,6 +9,7 @@ import { hash } from './commands/hash.js';
 import { hashCompare } from './commands/hashCompare.js';
 import { encrypt } from './commands/encrypt.js';
 import { decrypt } from './commands/decrypt.js';
+import { logStats } from './commands/logStats.js';
 
 function parseArgs(args) {
     const parsed = {};
@@ -148,6 +149,15 @@ export function startRepl(state) {
                     } catch {
                         console.log('Operation failed');
                     }
+                    break;
+                case 'log-stats':
+                    const logArgs = parseArgs(args);
+                    if (!logArgs['--input'] || !logArgs['--output']) {
+                        console.log('Invalid input');
+                        rl.prompt();
+                        return;
+                    }
+                    await logStats(state.cwd, logArgs);
                     break;
 
                 default:
