@@ -4,6 +4,7 @@ import { count } from './commands/count.js';
 import { csvToJson } from './commands/csvToJson.js';
 import { jsonToCsv } from './commands/jsonToCsv.js';
 import { hash } from './commands/hash.js';
+import { hashCompare } from './commands/hashCompare.js';
 
 function parseArgs(args) {
     const parsed = {};
@@ -99,6 +100,15 @@ export function startRepl(state) {
                     }
 
                     await hash(state.cwd, hashArgs);
+                    break;
+                case 'hash-compare':
+                    const compareArgs = parseArgs(args);
+                    if (!compareArgs['--input'] || !compareArgs['--hash']) {
+                        console.log('Invalid input');
+                        rl.prompt();
+                        return;
+                    }
+                    await hashCompare(state.cwd, compareArgs);
                     break;
 
                 default:

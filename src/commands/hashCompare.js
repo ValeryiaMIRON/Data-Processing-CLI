@@ -6,13 +6,13 @@ import { resolvePath } from '../utils/pathResolver.js';
 
 const SUPPORTED = ['sha256', 'md5', 'sha512'];
 
-export async function hash(cwd, args) {
+export async function hashCompare(cwd, args) {
     try {
         const input = args['--input'];
+        const hashFile = args['--hash'];
         const algorithm = args['--algorithm'] || 'sha256';
-        const save = args['--save'];
 
-        if (!input) {
+        if (!input || !hashFile) {
             console.log('Invalid input');
             return;
         }
@@ -23,9 +23,9 @@ export async function hash(cwd, args) {
         }
 
         const inputPath = resolvePath(cwd, input);
+        const hashPath = resolvePath(cwd, hashFile);
 
         const hash = crypto.createHash(algorithm);
-
         const readStream = fs.createReadStream(inputPath);
 
         await pipeline(
@@ -39,11 +39,12 @@ export async function hash(cwd, args) {
 
         const digest = hash.digest('hex');
 
-        console.log(`${algorithm}: ${digest}`);
+        let expected = fs.readFileSync(hashPath, 'utf-8').trim();
 
-        if (save) {
-            const outputPath = `${inputPath}.${algorithm}`;
-            await fs.promises.writeFile(outputPath, digest);
+        if (digest.toLowerCase() === expected.toLowerCase()) {
+            console.log('OK');
+        } else {
+            console.log('MISMATCH');
         }
 
     } catch {
