@@ -1,10 +1,14 @@
 import readline from 'readline';
+import fs from 'fs';
+import path from 'path';
 import { up, cd, ls } from './navigation.js';
 import { count } from './commands/count.js';
 import { csvToJson } from './commands/csvToJson.js';
 import { jsonToCsv } from './commands/jsonToCsv.js';
 import { hash } from './commands/hash.js';
 import { hashCompare } from './commands/hashCompare.js';
+import { encrypt } from './commands/encrypt.js';
+import { decrypt } from './commands/decrypt.js';
 
 function parseArgs(args) {
     const parsed = {};
@@ -109,6 +113,41 @@ export function startRepl(state) {
                         return;
                     }
                     await hashCompare(state.cwd, compareArgs);
+                    break;
+
+                case 'encrypt':
+                    const encryptArgs = parseArgs(args);
+                    if (!encryptArgs['--input'] || !encryptArgs['--output'] || !encryptArgs['--password']) {
+                        console.log('Invalid input');
+                        rl.prompt();
+                        return;
+                    }
+                    await encrypt(state.cwd, encryptArgs);
+                    break;
+                case 'decrypt':
+                    const decryptArgs = parseArgs(args);
+                    if (!decryptArgs['--input'] || !decryptArgs['--output'] || !decryptArgs['--password']) {
+                        console.log('Invalid input');
+                        rl.prompt();
+                        return;
+                    }
+                    await decrypt(state.cwd, decryptArgs);
+                    break;
+                case 'diff':
+                    if (args.length < 2) {
+                        console.log('Invalid input');
+                        rl.prompt();
+                        return;
+                    }
+                    try {
+                        const path1 = path.resolve(state.cwd, args[0]);
+                        const path2 = path.resolve(state.cwd, args[1]);
+                        const content1 = fs.readFileSync(path1, 'utf-8');
+                        const content2 = fs.readFileSync(path2, 'utf-8');
+                        console.log(content1 === content2 ? 'Files are identical' : 'Files differ');
+                    } catch {
+                        console.log('Operation failed');
+                    }
                     break;
 
                 default:
