@@ -1,4 +1,5 @@
 import readline from 'readline';
+import { up, cd, ls } from './navigation.js';
 
 export function startRepl(state) {
   const rl = readline.createInterface({
@@ -10,17 +11,43 @@ export function startRepl(state) {
   rl.prompt();
 
   rl.on('line', async (line) => {
-    const input = line.trim();
+  const input = line.trim();
 
-    if (input === '.exit') {
-      exit(rl);
-      return;
+  if (input === '.exit') {
+    exit(rl);
+    return;
+  }
+
+  const [command, arg] = input.split(' ');
+
+  try {
+    switch (command) {
+      case 'up':
+        up(state);
+        break;
+
+      case 'cd':
+        if (!arg) throw new Error();
+        await cd(state, arg);
+        break;
+
+      case 'ls':
+        await ls(state);
+        break;
+
+      default:
+        console.log('Invalid input');
+        rl.prompt();
+        return;
     }
 
-    console.log('Invalid input');
+    console.log(`You are currently in ${state.cwd}`);
+  } catch {
+    console.log('Operation failed');
+  }
 
-    rl.prompt();
-  });
+  rl.prompt();
+});
 
   rl.on('SIGINT', () => {
     exit(rl);
